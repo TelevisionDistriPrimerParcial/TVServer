@@ -258,19 +258,20 @@ public class Peticion {
         }
         return flag;
     }
-    
-    public boolean registroNuevoCanal(String []datos) {
+
+    public boolean registroNuevoCanal(String[] datos) {
         boolean flag = true;
         String query = null;
         PreparedStatement ps = null;
         con = DataConnect.getConnection();
 
         try {
-            query = "INSERT INTO CANAL (CANAL_NOMBRE, CANAL_NUMERO, CANAL_TIPO) values (?,?)";
+            query = "INSERT INTO CANAL (CANAL_NOMBRE, CANAL_NUMERO, CANAL_TIPO, CANAL_PREMIUM) values (?,?,?,?)";
             ps = con.prepareStatement(query);
             ps.setString(1, datos[0]);
             ps.setString(2, datos[1]);
             ps.setString(3, datos[2]);
+            ps.setString(4, datos[3]);
             ps.executeUpdate();
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
