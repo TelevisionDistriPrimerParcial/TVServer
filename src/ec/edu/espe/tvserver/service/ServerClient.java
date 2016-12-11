@@ -125,6 +125,17 @@ public class ServerClient extends Thread {
                 }
                 System.err.println("Servidor responde: " + rs);
                 break;
+
+            case "REGEQU": //autenticación
+                boolean nuevoEquipo = p.registroNuevoEquipo(datosCuerpo[0], datosCuerpo[1]);            
+                if (nuevoEquipo) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT";
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
         }
 
         return rs;

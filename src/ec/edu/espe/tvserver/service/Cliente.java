@@ -56,7 +56,8 @@ public class Cliente {
             //String request = "RQENROLL00000LOGIN020161203233018alias123|pass";
             ///String request = "RQENROLL00001REGCLI20161203233018Carlos|Proaño"
                     //+ "|1722484772|593022370455|andy_proanio@hotmail.com|Quito|Tumbaco";
-                    String request = "RQENROLL00001CERSES20161203233018OUT";
+                   // String request = "RQENROLL00001CERSES20161203233018OUT";
+                   String request = "RQPRODUC00000REGEQU20161203233018SM-N920G|750";
             //while (request  != null) {
             out.println(request);
             System.out.println("Servidor dice: " + in.readLine());
