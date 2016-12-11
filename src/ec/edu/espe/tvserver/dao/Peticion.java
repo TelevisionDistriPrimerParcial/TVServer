@@ -270,7 +270,7 @@ public class Peticion {
         try {
             st = con.createStatement();
             //Verifica si el usuario ingresado ya existen en la base de datos y no permite duplicados
-            query = "SELECT CANAL_CODIGO FROM CANAL WHERE";
+            query = "SELECT CANAL_CODIGO FROM CANAL";
             rs = st.executeQuery(query);
             while (rs.next()) {
                 String codCanal = rs.getString(1);
@@ -313,5 +313,50 @@ public class Peticion {
             DataConnect.close(con);
         }
         return flag;
+    }
+
+    public String consultaPlanesCliente(String codigoCliente) {
+        String cuerpo = null;
+        String nombrePlan = null;
+        String codigoPlan = null;
+        List<String> listanamePlanes = null;
+        List<String> listacodPlanes = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "Select d.PLAN_CODIGO FROM DETALLE_CONTRATO d, "
+                    + "CONTRATO c WHERE d.CONTRATO_CODIGO=c.CONTRATO_CODIGO "
+                    + "AND c.USUARIO_CODIGO='" + codigoCliente + "';";
+            ResultSet rs = st.executeQuery(query);
+            listacodPlanes = new ArrayList<>();
+            while (rs.next()) {
+                listacodPlanes.add(rs.getString(1));
+            }
+
+            if (listacodPlanes.size() > 0) {
+                listanamePlanes = new ArrayList<>();
+                for (int i = 0; i < listacodPlanes.size(); i++) {
+                    query = "SELECT PLAN_NOMBRE FROM PLAN "
+                            + "WHERE PLAN_CODIGO = '" + listacodPlanes.get(i) + "'";
+                    rs = st.executeQuery(query);
+                    while (rs.next()) {
+                        listanamePlanes.add(rs.getString(1));
+                    }
+                }
+
+                for (int i = 0; i < listacodPlanes.size(); i++) {
+                    cuerpo = cuerpo + listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
+                    if (i < listacodPlanes.size() - 1) {
+                        cuerpo = cuerpo + "&";
+                    }
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
     }
 }

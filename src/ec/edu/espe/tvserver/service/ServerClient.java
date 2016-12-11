@@ -164,6 +164,17 @@ public class ServerClient extends Thread {
                 }
                 System.err.println("Servidor responde: " + rs);
                 break;
+
+            case "PANCLI": //consulta los planes del cliente
+                String planes = p.consultaPlanesCliente(cuerpo);
+                if (planes != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + planes;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
         }
 
         return rs;
