@@ -25,6 +25,10 @@ public class Peticion {
     private Connection con = null;
     /*
     Saludos brow ya estamos trbajando colaborativo
+    para subir cambios con commit
+    pero antes de hacer comit siempre debes hacer update-to-head
+    y listo
+    para ver los cambios de los demas solo update-to-head
     */
 
     public boolean login(String user, String pass) {
