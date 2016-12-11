@@ -317,8 +317,6 @@ public class Peticion {
 
     public String consultaPlanesCliente(String codigoCliente) {
         String cuerpo = null;
-        String nombrePlan = null;
-        String codigoPlan = null;
         List<String> listanamePlanes = null;
         List<String> listacodPlanes = null;
         try {
@@ -345,7 +343,11 @@ public class Peticion {
                 }
 
                 for (int i = 0; i < listacodPlanes.size(); i++) {
-                    cuerpo = cuerpo + listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
+                    if (i == 0) {
+                        cuerpo = listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
+                    } else {
+                        cuerpo = cuerpo + listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
+                    }
                     if (i < listacodPlanes.size() - 1) {
                         cuerpo = cuerpo + "&";
                     }
