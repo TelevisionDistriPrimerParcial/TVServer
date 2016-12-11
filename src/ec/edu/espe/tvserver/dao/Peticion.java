@@ -259,20 +259,53 @@ public class Peticion {
         return flag;
     }
 
-    public boolean registroNuevoCanal(String[] datos) {
-        boolean flag = true;
+    public String registroNuevoCanal(String[] datos) {
+        String exito = "A";
         String query = null;
         PreparedStatement ps = null;
+        Statement st = null;
+        ResultSet rs = null;
         con = DataConnect.getConnection();
 
         try {
-            query = "INSERT INTO CANAL (CANAL_NOMBRE, CANAL_NUMERO, CANAL_TIPO, CANAL_PREMIUM) values (?,?,?,?)";
+            st = con.createStatement();
+            //Verifica si el usuario ingresado ya existen en la base de datos y no permite duplicados
+            query = "SELECT CANAL_CODIGO FROM CANAL WHERE";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                String codCanal = rs.getString(1);
+                if (codCanal.equals(datos[0])) {
+                    return exito = "Y";
+                }
+            }
+
+            query = "INSERT INTO CANAL (CANAL_CODIGO, CANAL_NOMBRE, CANAL_TIPO, CANAL_PREMIUM) values (?,?,?,?)";
             ps = con.prepareStatement(query);
             ps.setString(1, datos[0]);
             ps.setString(2, datos[1]);
             ps.setString(3, datos[2]);
             ps.setString(4, datos[3]);
             ps.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            exito = "E";
+        } finally {
+            DataConnect.close(con);
+        }
+        return exito;
+    }
+
+    public boolean actualizarUserPass(String[] datos) {
+        boolean flag = true;
+        PreparedStatement ps = null;
+        String query = null;
+        con = DataConnect.getConnection();
+        try {
+            query = "UPDATE USUARIO SET USUARIO_NOMBRE='" + datos[1] + "', "
+                    + "USUARIO_CLAVE='" + datos[2] + "' WHERE USUARIO_CODIGO='" + datos[0] + "';";
+            ps = con.prepareStatement(query);
+            ps.executeUpdate();
+            ps.close();
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
             flag = false;

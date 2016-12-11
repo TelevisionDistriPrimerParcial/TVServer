@@ -138,8 +138,25 @@ public class ServerClient extends Thread {
                 break;
 
             case "REGCAN": //registro nuevo canal
-                boolean nuevoCanal = p.registroNuevoCanal(datosCuerpo);
-                if (nuevoCanal) {
+                String nuevoCanal = p.registroNuevoCanal(datosCuerpo);
+                rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha;
+                switch (nuevoCanal) {
+                    case "A":
+                        rs = rs + "ACCEPT";
+                        break;
+                    case "Y":
+                        rs = rs + "DENIEDY";
+                        break;
+                    default:
+                        rs = rs + "DENIED";
+                        break;
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "ACTCLI": //actualización de nombre de usuario, y contraseña
+                boolean cambioDatos = p.actualizarUserPass(datosCuerpo);
+                if (cambioDatos) {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
                             + "ACCEPT";
                 } else {
