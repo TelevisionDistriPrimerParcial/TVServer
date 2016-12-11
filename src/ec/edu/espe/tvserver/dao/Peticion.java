@@ -23,6 +23,9 @@ import java.util.List;
 public class Peticion {
 
     private Connection con = null;
+    /*
+    Saludos brow ya estamos trbajando colaborativo
+    */
 
     public boolean login(String user, String pass) {
         boolean flag = false;
