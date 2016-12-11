@@ -239,81 +239,24 @@ public class Peticion {
         return cuerpo;
     }
 
-    //en caso de haber un error al registrar el cliente, deshace los registros ingresados
-    public void deshacerRegistroCliente(int cont) {
-        Connection conn = DataConnect.getConnection();
+    public boolean registroNuevoEquipo(String nombre, String costo) {
+        boolean flag = true;
+        String query = null;
+        PreparedStatement ps = null;
+        con = DataConnect.getConnection();
+
         try {
-            Statement s = null;
-            ResultSet r = null;
-            String query = null;
-            String codigoUser = null;
-            s = con.createStatement();
-            query = "SELECT MAX(USUARIO_CODIGO) FROM USUARIO";
-            r = s.executeQuery(query);
-            while (r.next()) {
-                codigoUser = r.getString(1);
-            }
-            switch (cont) {
-                case 1:
-                    s = conn.createStatement();
-                    query = "DELETE FROM USUARIO WHERE USUARIO_CODIGO = '" + codigoUser + "'";
-                    s.execute(query);
-                    break;
-                case 2:
-                    s = conn.createStatement();
-                    query = "DELETE FROM CLIENTE WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(USUARIO_CODIGO) FROM USUARIO)";
-                    s.execute(query);
-                    query = "DELETE FROM USUARIO WHERE USUARIO_CODIGO = '" + codigoUser + "'";
-                    s.execute(query);
-                    break;
-                case 3:
-                    s = conn.createStatement();
-                    query = "DELETE FROM CONTRATO WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(CLIENTE_CODIGO) FROM CLIENTE)";
-                    s.execute(query);
-                    query = "DELETE FROM CLIENTE WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(USUARIO_CODIGO) FROM USUARIO)";
-                    s.execute(query);
-                    query = "DELETE FROM USUARIO WHERE USUARIO_CODIGO = '" + codigoUser + "'";
-                    s.execute(query);
-                    break;
-                case 4:
-                    s = conn.createStatement();
-                    query = "DELETE FROM DETALLE_CONTRATO WHERE CONTRATO_CODIGO = "
-                            + "(SELECT MAX(CONTRATO_CODIGO) FROM CONTRATO)";
-                    s.execute(query);
-                    query = "DELETE FROM CONTRATO WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(CLIENTE_CODIGO) FROM CLIENTE)";
-                    s.execute(query);
-                    query = "DELETE FROM CLIENTE WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(USUARIO_CODIGO) FROM USUARIO)";
-                    s.execute(query);
-                    query = "DELETE FROM USUARIO WHERE USUARIO_CODIGO = '" + codigoUser + "'";
-                    s.execute(query);
-                    break;
-                case 5:
-                    s = conn.createStatement();
-                    query = "DELETE FROM DETALLE_CONTRATO_EQUIPO WHERE DETALLE_CONTRATO_CODIGO = "
-                            + "(SELECT MAX(DETALLE_CONTRATO_CODIGO) FROM DETALLE_CONTRATO)";
-                    s.execute(query);
-                    query = "DELETE FROM DETALLE_CONTRATO WHERE CONTRATO_CODIGO = "
-                            + "(SELECT MAX(CONTRATO_CODIGO) FROM CONTRATO)";
-                    s.execute(query);
-                    query = "DELETE FROM CONTRATO WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(CLIENTE_CODIGO) FROM CLIENTE)";
-                    s.execute(query);
-                    query = "DELETE FROM CLIENTE WHERE CLIENTE_CODIGO = "
-                            + "(SELECT MAX(USUARIO_CODIGO) FROM USUARIO)";
-                    s.execute(query);
-                    query = "DELETE FROM USUARIO WHERE USUARIO_CODIGO = '" + codigoUser + "'";
-                    s.execute(query);
-                    break;
-            }
+            query = "INSERT INTO EQUIPO (EQUIPO_NOMBRE, EQUIPO_COSTO) values (?,?)";
+            ps = con.prepareStatement(query);
+            ps.setString(1, nombre);
+            ps.setString(2, costo);
+            ps.executeUpdate();
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
+            flag = false;
         } finally {
-            DataConnect.close(conn);
+            DataConnect.close(con);
         }
+        return flag;
     }
 }
