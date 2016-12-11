@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,13 +22,6 @@ import java.util.List;
 public class Peticion {
 
     private Connection con = null;
-    /*
-    Saludos brow ya estamos trbajando colaborativo
-    para subir cambios con commit
-    pero antes de hacer comit siempre debes hacer update-to-head
-    y listo
-    para ver los cambios de los demas solo update-to-head
-    */
 
     public boolean login(String user, String pass) {
         boolean flag = false;
@@ -257,6 +249,28 @@ public class Peticion {
             ps = con.prepareStatement(query);
             ps.setString(1, nombre);
             ps.setString(2, costo);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            flag = false;
+        } finally {
+            DataConnect.close(con);
+        }
+        return flag;
+    }
+    
+    public boolean registroNuevoCanal(String []datos) {
+        boolean flag = true;
+        String query = null;
+        PreparedStatement ps = null;
+        con = DataConnect.getConnection();
+
+        try {
+            query = "INSERT INTO CANAL (CANAL_NOMBRE, CANAL_NUMERO, CANAL_TIPO) values (?,?)";
+            ps = con.prepareStatement(query);
+            ps.setString(1, datos[0]);
+            ps.setString(2, datos[1]);
+            ps.setString(3, datos[2]);
             ps.executeUpdate();
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
