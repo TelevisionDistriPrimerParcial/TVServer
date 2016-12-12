@@ -83,6 +83,7 @@ public class ServerClient extends Thread {
                 boolean hizoLogin = p.login(datosCuerpo[0], datosCuerpo[1]);
                 if (hizoLogin) {
                     String codigoUsuario = p.getCodigoUsuario(datosCuerpo[0], datosCuerpo[1]);
+                    //comprar codigo con las tablas para ver el tipo de ususari permitido en sistema
                     String nombre = p.getNombreUsuario(codigoUsuario, sistemaConectado);
                     StringBuilder codigoUsuarioCabecera = concatenarCeros(codigoUsuario);
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
@@ -155,12 +156,18 @@ public class ServerClient extends Thread {
                 break;
 
             case "ACTCLI": //actualización de nombre de usuario, y contraseña
-                boolean cambioDatos = p.actualizarUserPass(datosCuerpo);
-                if (cambioDatos) {
-                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
-                            + "ACCEPT";
-                } else {
-                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                String cambioDatos = p.actualizarUserPass(datosCuerpo);
+                rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha;
+                switch (cambioDatos) {
+                    case "A":
+                        rs = rs + "ACCEPT";
+                        break;
+                    case "Y":
+                        rs = rs + "DENIEDY";
+                        break;
+                    default:
+                        rs = rs + "DENIED";
+                        break;
                 }
                 System.err.println("Servidor responde: " + rs);
                 break;

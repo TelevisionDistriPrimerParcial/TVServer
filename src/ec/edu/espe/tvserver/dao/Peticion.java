@@ -295,12 +295,24 @@ public class Peticion {
         return exito;
     }
 
-    public boolean actualizarUserPass(String[] datos) {
-        boolean flag = true;
+    public String actualizarUserPass(String[] datos) {
+        String exito = "A";
         PreparedStatement ps = null;
         String query = null;
+        Statement st = null;
+        ResultSet rs = null;
         con = DataConnect.getConnection();
         try {
+            st = con.createStatement();
+            //Verifica si el usuario ingresado ya existen en la base de datos y no permite duplicados
+            query = "SELECT USUARIO_NOMBRE FROM USUARIO";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                String nomUser = rs.getString(1);                
+                if (nomUser.equals(datos[1])) {
+                    return exito = "Y";
+                }
+            }
             query = "UPDATE USUARIO SET USUARIO_NOMBRE='" + datos[1] + "', "
                     + "USUARIO_CLAVE='" + datos[2] + "' WHERE USUARIO_CODIGO='" + datos[0] + "';";
             ps = con.prepareStatement(query);
@@ -308,11 +320,11 @@ public class Peticion {
             ps.close();
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
-            flag = false;
+            exito = "E";
         } finally {
             DataConnect.close(con);
         }
-        return flag;
+        return exito;
     }
 
     public String consultaPlanesCliente(String codigoCliente) {
