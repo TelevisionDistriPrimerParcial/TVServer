@@ -324,7 +324,7 @@ public class Peticion {
             Statement st = con.createStatement();
             String query = "Select d.PLAN_CODIGO FROM DETALLE_CONTRATO d, "
                     + "CONTRATO c WHERE d.CONTRATO_CODIGO=c.CONTRATO_CODIGO "
-                    + "AND c.USUARIO_CODIGO='" + codigoCliente + "';";
+                    + "AND c.USUARIO_CODIGO='" + codigoCliente + "'";
             ResultSet rs = st.executeQuery(query);
             listacodPlanes = new ArrayList<>();
             while (rs.next()) {
@@ -354,6 +354,108 @@ public class Peticion {
                 }
             }
 
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public String consultaCanales() {
+        String cuerpo = null;
+        List<String> listanameCanales = null;
+        List<String> listacodCanales = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "Select CANAL_CODIGO, CANAL_NOMBRE FROM CANAL";
+            ResultSet rs = st.executeQuery(query);
+            listacodCanales = new ArrayList<>();
+            listanameCanales = new ArrayList<>();
+            while (rs.next()) {
+                listacodCanales.add(rs.getString(1));
+                listanameCanales.add(rs.getString(2));
+            }
+
+            for (int i = 0; i < listacodCanales.size(); i++) {
+                if (i == 0) {
+                    cuerpo = listacodCanales.get(i) + "%" + listanameCanales.get(i);
+                } else {
+                    cuerpo = cuerpo + listacodCanales.get(i) + "%" + listanameCanales.get(i);
+                }
+                if (i < listacodCanales.size() - 1) {
+                    cuerpo = cuerpo + "&";
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+    
+    public String consultaPlanes() {
+        String cuerpo = null;
+        List<String> listanamePlanes = null;
+        List<String> listacodPlanes = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "Select PLAN_CODIGO, PLAN_NOMBRE FROM PLAN";
+            ResultSet rs = st.executeQuery(query);
+            listacodPlanes = new ArrayList<>();
+            listanamePlanes = new ArrayList<>();
+            while (rs.next()) {
+                listacodPlanes.add(rs.getString(1));
+                listanamePlanes.add(rs.getString(2));
+            }
+
+            for (int i = 0; i < listacodPlanes.size(); i++) {
+                if (i == 0) {
+                    cuerpo = listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
+                } else {
+                    cuerpo = cuerpo + listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
+                }
+                if (i < listacodPlanes.size() - 1) {
+                    cuerpo = cuerpo + "&";
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+    
+    public String consultaEquipos() {
+        String cuerpo = null;
+        List<String> listanameEquipos = null;
+        List<String> listacodEquipos = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "Select EQUIPO_CODIGO, EQUIPO_NOMBRE FROM EQUIPO";
+            ResultSet rs = st.executeQuery(query);
+            listacodEquipos = new ArrayList<>();
+            listanameEquipos = new ArrayList<>();
+            while (rs.next()) {
+                listacodEquipos.add(rs.getString(1));
+                listanameEquipos.add(rs.getString(2));
+            }
+
+            for (int i = 0; i < listacodEquipos.size(); i++) {
+                if (i == 0) {
+                    cuerpo = listacodEquipos.get(i) + "%" + listanameEquipos.get(i);
+                } else {
+                    cuerpo = cuerpo + listacodEquipos.get(i) + "%" + listanameEquipos.get(i);
+                }
+                if (i < listacodEquipos.size() - 1) {
+                    cuerpo = cuerpo + "&";
+                }
+            }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         } finally {
