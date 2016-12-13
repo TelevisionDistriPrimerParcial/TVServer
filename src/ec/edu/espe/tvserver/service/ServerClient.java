@@ -319,6 +319,50 @@ public class ServerClient extends Thread {
                 }
                 System.err.println("Servidor responde: " + rs);
                 break;
+
+            case "CONTOT": //pago de la factura
+                String total = p.totalPago(cuerpo);
+                if (total != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + total;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "SERTEC": //registro nuevo plan
+                boolean nuevoSoport = p.registroNuevoSoporte(datosCuerpo);
+                if (nuevoSoport) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT";
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "CONADI": //consulta todos los servicios adicionales
+                String adicional = p.consultaSerAdi();
+                if (adicional != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + adicional;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "CONPRE": //consulta todos los canales especial (premium)
+                String canalespre = p.consultaCanalesPremium();
+                if (canalespre != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + canalespre;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
         }
 
         return rs;

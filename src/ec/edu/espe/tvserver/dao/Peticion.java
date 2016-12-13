@@ -76,7 +76,7 @@ public class Peticion {
         }
         return flag;
     }
-    
+
     public boolean verificarAutorizacionEm(String codigoUser) {
         boolean flag = true;
         String cod = null;
@@ -787,6 +787,12 @@ public class Peticion {
                 ps.setDate(3, sqlDate);
                 ps.setString(4, total);
                 ps.executeUpdate();
+
+                query = "INSERT INTO FACTURA (CONTRATO_CODIGO, FACTURA_FECHA) values (?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, codContrato);
+                ps.setDate(2, sqlDate);
+                ps.executeUpdate();
             }
         } catch (SQLException ex) {
             //System.out.println(ex.getMessage());
@@ -830,8 +836,71 @@ public class Peticion {
             sumEquipo += costoPlan;
         } catch (SQLException ex) {
             //System.out.println(ex.getMessage());
-        } 
+        }
         return Double.toString(sumEquipo);
+    }
+
+    public String totalPago(String cuerpo) {
+        String query = null;
+        ResultSet rs = null;
+        Statement st = null;
+        String fecha = cuerpo.substring(0, 13);
+        String contrato = cuerpo.substring(14);
+        String codUltimaFactura = null;
+        String servicioCod = null;
+        int anio = Integer.parseInt(fecha.substring(0, 3));
+        int mes = Integer.parseInt(fecha.substring(4, 5));
+        int dia = Integer.parseInt(fecha.substring(6, 7));
+        java.util.Date dFinal = new Date(anio, mes, dia);
+        java.util.Date dInicial = null;
+        java.util.Date dMedio = null;
+        double costoPlan = 0.0;
+        double costoTicket = 0.0;
+        con = DataConnect.getConnection();
+
+        try {
+            st = con.createStatement();
+            query = "SELECT P.PLAN_TARIFA FROM PLAN P, DETALLE_CONTRATO D "
+                    + "WHERE P.PLAN_CODIGO = D.PLAN_CODIGO AND D.CONTRATO_CODIGO = '" + contrato + "'";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                costoPlan = rs.getDouble(1);
+            }
+
+            st = con.createStatement();
+            query = "SELECT MAX(FACTURA_CODIGO), FACTURA_FECHA FROM "
+                    + "FACTURA WHERE CONTRATO_CODIGO = '" + contrato + "' "
+                    + "ORDER BY FACTURA_CODIGO";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                codUltimaFactura = rs.getString(1);
+                dInicial = rs.getDate(2);
+            }
+
+            List<String> codServicoPagar = new ArrayList<>();
+            query = "SELECT TICKET_SERVICIO_CODIGO, TICKET_SERVICIO_FECHA FROM "
+                    + "TICKET_SERVICIO WHERE FACTURA_CODIGO = '" + codUltimaFactura + "' ";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                servicioCod = rs.getString(1);
+                dMedio = rs.getDate(2);
+                if (dMedio.after(dInicial) && dMedio.before(dFinal)) {
+                    codServicoPagar.add(servicioCod);
+                }
+            }
+
+            for (int i = 0; i < codServicoPagar.size(); i++) {
+                query = "SELECT TICKET_SERVICIO_CODIGO, TICKET_SERVICIO_FECHA FROM "
+                        + "TICKET_SERVICIO WHERE FACTURA_CODIGO = '" + codUltimaFactura + "' ";
+                rs = st.executeQuery(query);
+                while (rs.next()) {
+                    costoTicket += Double.parseDouble(rs.getString(1));
+                }
+            }
+        } catch (SQLException e) {
+            //System.out.println(ex.getMessage());
+        }
+        return Double.toString(costoPlan + costoTicket);
     }
 
     public String consultarCedulas() {
@@ -893,6 +962,132 @@ public class Peticion {
             }
         } catch (SQLException ex) {
             ///System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public boolean registroNuevoSoporte(String[] cuerpo) {
+        boolean flag = true;
+        String query = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Statement st = null;
+        String codTicket = null;
+        String codUltimaFactura = null;
+        con = DataConnect.getConnection();
+
+        try {
+            st = con.createStatement();
+            query = "SELECT MAX(FACTURA_CODIGO) FROM "
+                    + "FACTURA WHERE CONTRATO_CODIGO = '" + cuerpo[0] + "' "
+                    + "ORDER BY FACTURA_CODIGO";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                codUltimaFactura = rs.getString(1);
+            }
+
+            java.util.Date utilDate = new java.util.Date();
+            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+
+            query = "INSERT INTO TICKET_SERVICIO (FACTURA_CODIGO, "
+                    + "SERVICIO_ADICIONAL_CODIGO, TICKET_SERVICIO_FECHA) values (?,?,?)";
+            ps = con.prepareStatement(query);
+            ps.setString(1, codUltimaFactura);
+            ps.setString(2, cuerpo[1]);
+            ps.setDate(2, sqlDate);
+            ps.executeUpdate();
+
+            if (cuerpo[1].equals("1")) {
+                query = "SELECT MAX(TICKET_SERVICIO_CODIGO) FROM "
+                        + "TICKET_SERVICIO";
+                rs = st.executeQuery(query);
+                while (rs.next()) {
+                    codTicket = rs.getString(1);
+                }
+
+                query = "INSERT INTO TICKET_SERVICIO_CANAL (TICKET_SERVICIO_CODIGO, "
+                        + "CANAL_CODIGO) values (?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, codTicket);
+                ps.setString(2, cuerpo[1]);
+                ps.executeUpdate();
+            }
+
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            flag = false;
+        } finally {
+            DataConnect.close(con);
+        }
+        return flag;
+    }
+
+    public String consultaSerAdi() {
+        String cuerpo = null;
+        List<String> listanameAdi = null;
+        List<String> listacodAdi = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "Select SERVICIO_ADICIONAL_CODIGO, SERVICIO_ADICIONAL_DETALLE FROM SERVICIO_ADICIONAL";
+            ResultSet rs = st.executeQuery(query);
+            listacodAdi = new ArrayList<>();
+            listanameAdi = new ArrayList<>();
+            while (rs.next()) {
+                listacodAdi.add(rs.getString(1));
+                listanameAdi.add(rs.getString(2));
+            }
+
+            for (int i = 0; i < listacodAdi.size(); i++) {
+                if (i == 0) {
+                    cuerpo = listacodAdi.get(i) + "%" + listanameAdi.get(i);
+                } else {
+                    cuerpo = cuerpo + listacodAdi.get(i) + "%" + listanameAdi.get(i);
+                }
+                if (i < listacodAdi.size() - 1) {
+                    cuerpo = cuerpo + "&";
+                }
+            }
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+    
+    public String consultaCanalesPremium() {
+        String cuerpo = null;
+        List<String> listanameCanales = null;
+        List<String> listacodCanales = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "Select CANAL_CODIGO, CANAL_NOMBRE FROM CANAL WHERE CANAL_PREMIUM = 1";
+            ResultSet rs = st.executeQuery(query);
+            listacodCanales = new ArrayList<>();
+            listanameCanales = new ArrayList<>();
+            while (rs.next()) {
+                listacodCanales.add(rs.getString(1));
+                listanameCanales.add(rs.getString(2));
+            }
+
+            for (int i = 0; i < listacodCanales.size(); i++) {
+                if (i == 0) {
+                    cuerpo = listacodCanales.get(i) + "%" + listanameCanales.get(i);
+                } else {
+                    cuerpo = cuerpo + listacodCanales.get(i) + "%" + listanameCanales.get(i);
+                }
+                if (i < listacodCanales.size() - 1) {
+                    cuerpo = cuerpo + "&";
+                }
+            }
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
