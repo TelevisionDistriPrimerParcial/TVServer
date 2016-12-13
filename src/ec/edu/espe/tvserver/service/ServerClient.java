@@ -155,6 +155,17 @@ public class ServerClient extends Thread {
                 System.err.println("Servidor responde: " + rs);
                 break;
 
+            case "REGPAN": //registro nuevo plan
+                boolean nuevoPlan = p.registroNuevoPlan(datosCuerpo);
+                if (nuevoPlan) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT";
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
             case "ACTCLI": //actualización de nombre de usuario, y contraseña
                 String cambioDatos = p.actualizarUserPass(datosCuerpo);
                 rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha;
@@ -221,6 +232,28 @@ public class ServerClient extends Thread {
                 if (equipos2 != null) {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
                             + "ACCEPT" + equipos2;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "DATPAN": //consulta datos plan
+                String planes3 = p.consultarPlanes(cuerpo);
+                if (planes3 != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + planes3;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "DATEQU": //consulta datos plan
+                String equipos3 = p.consultarEquipos(cuerpo);
+                if (equipos3 != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + equipos3;
                 } else {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
                 }

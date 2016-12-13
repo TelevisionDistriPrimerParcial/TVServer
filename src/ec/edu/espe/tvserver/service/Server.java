@@ -13,7 +13,7 @@ import java.net.ServerSocket;
  */
 public class Server {
 
-    private static final int puerto = 9001;
+    private static final int puerto = 7000;
 
     public static void main(String[] args) throws Exception {
         System.out.println("Servidor OK en puerto: " + puerto);
