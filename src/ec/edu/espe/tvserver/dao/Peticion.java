@@ -178,10 +178,8 @@ public class Peticion {
         String nombre = null;
         String apellido = null;
         String codigoCliente = null;
-        String codigoContrato = null;
         String nombrePlan = null;
         List<String> listaContratos = null;
-        List<String> listaPlanes = null;
         try {
             con = DataConnect.getConnection();
             Statement st = con.createStatement();
@@ -205,26 +203,17 @@ public class Peticion {
                 }
 
                 if (listaContratos.size() > 0) {
-                    listaPlanes = new ArrayList<>();
-                    for (int i = 0; i < listaContratos.size(); i++) {
-                        query = "SELECT PLAN_CODIGO FROM DETALLE_CONTRATO "
-                                + "WHERE CONTRATO_CODIGO = '" + listaContratos.get(i) + "'";
-                        rs = st.executeQuery(query);
-                        while (rs.next()) {
-                            listaPlanes.add(rs.getString(1));
-                        }
-                    }
                     cuerpo = cuerpo + "|";
-
-                    for (int i = 0; i < listaPlanes.size(); i++) {
-                        query = "SELECT PLAN_NOMBRE FROM PLAN "
-                                + "WHERE PLAN_CODIGO = '" + listaPlanes.get(i) + "'";
+                    for (int i = 0; i < listaContratos.size(); i++) {
+                        query = "SELECT PLAN_NOMBRE FROM PLAN P, DETALLE_CONTRATO C "
+                                + "WHERE P.PLAN_CODIGO = C.PLAN_CODIGO AND "
+                                + "C.CONTRATO_CODIGO = '" + listaContratos.get(i) + "'";
                         rs = st.executeQuery(query);
                         while (rs.next()) {
                             nombrePlan = rs.getString(1);
                         }
                         cuerpo = cuerpo + listaContratos.get(i) + "%" + nombrePlan;
-                        if (i < listaPlanes.size() - 1) {
+                        if (i < listaContratos.size() - 1) {
                             cuerpo = cuerpo + "&";
                         }
                     }
@@ -308,7 +297,7 @@ public class Peticion {
             query = "SELECT USUARIO_NOMBRE FROM USUARIO";
             rs = st.executeQuery(query);
             while (rs.next()) {
-                String nomUser = rs.getString(1);                
+                String nomUser = rs.getString(1);
                 if (nomUser.equals(datos[1])) {
                     return exito = "Y";
                 }
@@ -331,41 +320,74 @@ public class Peticion {
         String cuerpo = null;
         List<String> listanamePlanes = null;
         List<String> listacodPlanes = null;
+        List<String> listaContratos = null;
         try {
             con = DataConnect.getConnection();
             Statement st = con.createStatement();
-            String query = "Select d.PLAN_CODIGO FROM DETALLE_CONTRATO d, "
-                    + "CONTRATO c WHERE d.CONTRATO_CODIGO=c.CONTRATO_CODIGO "
-                    + "AND c.USUARIO_CODIGO='" + codigoCliente + "'";
+            listaContratos = new ArrayList<>();
+            String query = "SELECT CONTRATO_CODIGO FROM CONTRATO "
+                    + "WHERE USUARIO_CODIGO = '" + codigoCliente + "'";
             ResultSet rs = st.executeQuery(query);
-            listacodPlanes = new ArrayList<>();
             while (rs.next()) {
-                listacodPlanes.add(rs.getString(1));
+                listaContratos.add(rs.getString(1));
             }
 
-            if (listacodPlanes.size() > 0) {
-                listanamePlanes = new ArrayList<>();
-                for (int i = 0; i < listacodPlanes.size(); i++) {
-                    query = "SELECT PLAN_NOMBRE FROM PLAN "
-                            + "WHERE PLAN_CODIGO = '" + listacodPlanes.get(i) + "'";
+            if (listaContratos.size() > 0) {
+                String nombrePlan = null;
+                cuerpo = cuerpo + "|";
+                for (int i = 0; i < listaContratos.size(); i++) {
+                    query = "SELECT PLAN_NOMBRE FROM PLAN P, DETALLE_CONTRATO C "
+                            + "WHERE P.PLAN_CODIGO = C.PLAN_CODIGO AND "
+                            + "C.CONTRATO_CODIGO = '" + listaContratos.get(i) + "'";
                     rs = st.executeQuery(query);
                     while (rs.next()) {
-                        listanamePlanes.add(rs.getString(1));
+                        nombrePlan = rs.getString(1);
                     }
-                }
-
-                for (int i = 0; i < listacodPlanes.size(); i++) {
-                    if (i == 0) {
-                        cuerpo = listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
-                    } else {
-                        cuerpo = cuerpo + listacodPlanes.get(i) + "%" + listanamePlanes.get(i);
-                    }
-                    if (i < listacodPlanes.size() - 1) {
+                    cuerpo = cuerpo + listaContratos.get(i) + "%" + nombrePlan;
+                    if (i < listaContratos.size() - 1) {
                         cuerpo = cuerpo + "&";
                     }
                 }
             }
 
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public String consultarEquiposCliente(String contrato) {
+        String cuerpo = null;
+        String nombreEquipo = null;
+        List<String> listaCodEquipos = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            listaCodEquipos = new ArrayList<>();
+            String query = "SELECT EQUIPO_CODIGO FROM DETALLE_CONTRATO_EQUIPO D, "
+                    + "DETALLE_CONTRATO C WHERE D.DETALLE_CONTRATO_CODIGO = "
+                    + "C.DETALLE_CONTRATO_CODIGO AND C.PLAN_CODIGO = '" + contrato + "'";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                listaCodEquipos.add(rs.getString(1));
+            }
+
+            if (listaCodEquipos.size() > 0) {
+                for (int i = 0; i < listaCodEquipos.size(); i++) {
+                    query = "SELECT EQUIPO_NOMBRE FROM EQUIPO "
+                            + "WHERE EQUIPO_CODIGO = '" + listaCodEquipos.get(i) + "'";
+                    rs = st.executeQuery(query);
+                    while (rs.next()) {
+                        nombreEquipo = rs.getString(1);
+                    }
+                    cuerpo = cuerpo + listaCodEquipos.get(i) + "%" + nombreEquipo;
+                    if (i < listaCodEquipos.size() - 1) {
+                        cuerpo = cuerpo + "&";
+                    }
+                }
+            }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         } finally {
@@ -407,7 +429,7 @@ public class Peticion {
         }
         return cuerpo;
     }
-    
+
     public String consultaPlanes() {
         String cuerpo = null;
         List<String> listanamePlanes = null;
@@ -441,7 +463,7 @@ public class Peticion {
         }
         return cuerpo;
     }
-    
+
     public String consultaEquipos() {
         String cuerpo = null;
         List<String> listanameEquipos = null;

@@ -55,7 +55,8 @@ public class Cliente {
                    // String request = "RQENROLL00001CERSES20161203233018OUT";
                   // String request = "RQPRODUC00000REGEQU20161203233018SM-N920G|750";
                   ///String request = "RQSERVIC00005PANCLI20161211153750CANALE";
-                  String request = "RQSERVIC00005CONCAN201612111537507";
+                  //String request = "RQSERVIC00005CONCAN201612111537507";
+                  String request = "RQENROLL00001CLICED201612111537501721557824";
             //while (request  != null) {
             out.println(request);
             System.out.println("Servidor dice: " + in.readLine());

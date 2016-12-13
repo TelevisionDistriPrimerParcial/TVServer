@@ -183,6 +183,17 @@ public class ServerClient extends Thread {
                 System.err.println("Servidor responde: " + rs);
                 break;
 
+            case "EQUCLI": //consulta los equipos por plan de cliente
+                String equipos = p.consultarEquiposCliente(cuerpo);
+                if (equipos != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + equipos;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
             case "CONCAN": //consulta todos los canales
                 String canales = p.consultaCanales();
                 if (canales != null) {
@@ -206,10 +217,10 @@ public class ServerClient extends Thread {
                 break;
 
             case "CONEQU": //consulta todos los canales
-                String equipos = p.consultaEquipos();
-                if (equipos != null) {
+                String equipos2 = p.consultaEquipos();
+                if (equipos2 != null) {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
-                            + "ACCEPT" + equipos;
+                            + "ACCEPT" + equipos2;
                 } else {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
                 }
