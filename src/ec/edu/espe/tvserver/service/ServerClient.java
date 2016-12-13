@@ -84,10 +84,26 @@ public class ServerClient extends Thread {
                 if (hizoLogin) {
                     String codigoUsuario = p.getCodigoUsuario(datosCuerpo[0], datosCuerpo[1]);
                     //comprar codigo con las tablas para ver el tipo de ususari permitido en sistema
-                    String nombre = p.getNombreUsuario(codigoUsuario, sistemaConectado);
-                    StringBuilder codigoUsuarioCabecera = concatenarCeros(codigoUsuario);
-                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
-                            + "ACCEPT" + codigoUsuarioCabecera.toString() + nombre;
+                    if (sistemaConectado.equals("SERVIC")) {
+                        if (p.verificarAutorizacion(codigoUsuario)) {
+                            String nombre = p.getNombreUsuario(codigoUsuario, sistemaConectado);
+                            StringBuilder codigoUsuarioCabecera = concatenarCeros(codigoUsuario);
+                            rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                                    + "ACCEPT" + codigoUsuarioCabecera.toString() + nombre;
+                        } else {
+                            rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIEDN";
+                        }
+                    } else {
+                        if (p.verificarAutorizacionEm(codigoUsuario)) {
+                            String nombre = p.getNombreUsuario(codigoUsuario, sistemaConectado);
+                            StringBuilder codigoUsuarioCabecera = concatenarCeros(codigoUsuario);
+                            rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                                    + "ACCEPT" + codigoUsuarioCabecera.toString() + nombre;
+                        } else {
+                            rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIEDN";
+                        }
+                    }
+
                 } else {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
                 }
@@ -271,11 +287,11 @@ public class ServerClient extends Thread {
                 System.err.println("Servidor responde: " + rs);
                 break;
 
-            case "NUEPLA": //registro nuevo plan
-                boolean nuevoPlan2 = p.registroPlanCliente(datosCuerpo);
-                if (nuevoPlan2) {
+            case "NUEPLA": //registro nuevo plan del cliente
+                String nuevoPlan2 = p.registroPlanCliente(datosCuerpo);
+                if (nuevoPlan2 != null) {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
-                            + "ACCEPT";
+                            + "ACCEPT" + nuevoPlan2;
                 } else {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
                 }

@@ -44,7 +44,59 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return flag;
+    }
+
+    public boolean verificarAutorizacion(String codigoUser) {
+        boolean flag = true;
+        String cod = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT USUARIO_CODIGO FROM CLIENTE WHERE "
+                    + "USUARIO_CODIGO = '" + codigoUser + "'";
+            ResultSet rs = st.executeQuery(query);
+
+            while (rs.next()) {
+                cod = rs.getString(1);
+            }
+
+            if (cod == null) {
+                flag = false;
+            }
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            flag = false;
+        } finally {
+            DataConnect.close(con);
+        }
+        return flag;
+    }
+    
+    public boolean verificarAutorizacionEm(String codigoUser) {
+        boolean flag = true;
+        String cod = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT USUARIO_CODIGO FROM EMPLEADO WHERE "
+                    + "USUARIO_CODIGO = '" + codigoUser + "'";
+            ResultSet rs = st.executeQuery(query);
+
+            while (rs.next()) {
+                cod = rs.getString(1);
+            }
+
+            if (cod == null) {
+                flag = false;
+            }
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            flag = false;
         } finally {
             DataConnect.close(con);
         }
@@ -73,7 +125,7 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
         } finally {
             DataConnect.close(con);
         }
@@ -108,7 +160,7 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
         } finally {
             DataConnect.close(con);
         }
@@ -124,8 +176,6 @@ public class Peticion {
 
         try {
             String codigoCliente = null;
-            String codigoContrato = null;
-            String codigoDetalleContrato = null;
             con = DataConnect.getConnection();
             st = con.createStatement();
             //Verifica si el usuario ingresado ya existen en la base de datos y no permite duplicados
@@ -164,8 +214,7 @@ public class Peticion {
             ps.setString(8, datos[6]);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-            //deshacerRegistroCliente(cont);
+            //System.out.println(ex.getMessage());
             resp = "E";
         } finally {
             DataConnect.close(con);
@@ -220,7 +269,8 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -240,7 +290,7 @@ public class Peticion {
             ps.setString(2, costo);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
             flag = false;
         } finally {
             DataConnect.close(con);
@@ -279,7 +329,7 @@ public class Peticion {
                 ps.executeUpdate();
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
             flag = false;
         } finally {
             DataConnect.close(con);
@@ -315,7 +365,7 @@ public class Peticion {
             ps.setString(4, datos[3]);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
             exito = "E";
         } finally {
             DataConnect.close(con);
@@ -347,7 +397,7 @@ public class Peticion {
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
             exito = "E";
         } finally {
             DataConnect.close(con);
@@ -389,9 +439,9 @@ public class Peticion {
                     }
                 }
             }
-
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -437,7 +487,8 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -471,7 +522,8 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -505,7 +557,8 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -539,7 +592,8 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -564,8 +618,8 @@ public class Peticion {
                 tarifa = rs.getString(2);
             }
             cuerpo = tarifa + "|";
-            listaCodCanales = new ArrayList<String>();
-            listaNameCanales = new ArrayList<String>();
+            listaCodCanales = new ArrayList<>();
+            listaNameCanales = new ArrayList<>();
 
             query = "SELECT C.CANAL_CODIGO, C.CANAL_NOMBRE FROM CANAL C, "
                     + "PLAN_CANAL P WHERE C.CANAL_CODIGO = P.CANAL_CODIGO "
@@ -582,7 +636,8 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            ///System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -603,7 +658,8 @@ public class Peticion {
             }
             cuerpo = equipoCosto;
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
@@ -626,15 +682,15 @@ public class Peticion {
             }
             cuerpo = tipoCanal + "|" + pCanal;
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
         } finally {
             DataConnect.close(con);
         }
         return cuerpo;
     }
 
-    public boolean registroPlanCliente(String[] cuerpo) {
-        boolean flag = true;
+    public String registroPlanCliente(String[] cuerpo) {
         String query = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -643,6 +699,7 @@ public class Peticion {
         String codFactura = null;
         String detCodContrato = null;
         String codUser = null;
+        String total = null;
         con = DataConnect.getConnection();
 
         try {
@@ -694,8 +751,8 @@ public class Peticion {
                         String[] cant = extra[i].split("\\%");
                         if (cant[0].equals(cuerpo[2])) {
                             int cantidad = 1 + Integer.parseInt(cant[1]);
-                            query = "UPDATE DETALLE_CONTRATO_EQUIPO SET EQUIPO_CODIGO = '" + cantidad + "' "
-                                    + "WHERE EQUIPO_CANTIDAD = '" + cuerpo[2] + "'";
+                            query = "UPDATE DETALLE_CONTRATO_EQUIPO SET EQUIPO_CANTIDAD = '" + cantidad + "' "
+                                    + "WHERE EQUIPO_CODIGO = '" + cuerpo[2] + "'";
                             ps = con.prepareStatement(query);
                             ps.executeUpdate();
                         } else {
@@ -708,40 +765,78 @@ public class Peticion {
                         }
                     }
                 }
-                
+
                 query = "INSERT INTO FACTURA (CONTRATO_CODIGO, FACTURA_FECHA) values (?,?)";
                 ps = con.prepareStatement(query);
                 ps.setString(1, codContrato);
                 ps.setDate(2, sqlDate);
                 ps.executeUpdate();
-                
+
                 query = "SELECT MAX(FACTURA_CODIGO) FROM FACTURA";
                 rs = st.executeQuery(query);
                 while (rs.next()) {
                     codFactura = rs.getString(1);
                 }
-                
-                query = "INSERT INTO PAGO (FORMA_PAGO_CODIGO, FACTURA_CODIGO, PAGO_FECHA) values (?,?,?)";
+
+                total = calcularTotalPagado(codContrato);
+
+                query = "INSERT INTO PAGO (FORMA_PAGO_CODIGO, FACTURA_CODIGO, PAGO_FECHA, PAGO_TOTAL) values (?,?,?,?)";
                 ps = con.prepareStatement(query);
                 ps.setString(1, cuerpo[3]);
                 ps.setString(2, codFactura);
                 ps.setDate(3, sqlDate);
+                ps.setString(4, total);
                 ps.executeUpdate();
-
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-            flag = false;
+            //System.out.println(ex.getMessage());
+            total = null;
         } finally {
             DataConnect.close(con);
         }
-        return flag;
+        return total;
+    }
+
+    public String calcularTotalPagado(String contrato) {
+        String query = null;
+        ResultSet rs = null;
+        Statement st = null;
+        double costoPlan = 0.0;
+        double costoEquipo = 0.0;
+        int cantidadEquipo = 0;
+        double sumEquipo = 0.0;
+        con = DataConnect.getConnection();
+
+        try {
+            st = con.createStatement();
+            query = "SELECT P.PLAN_TARIFA FROM PLAN P, DETALLE_CONTRATO D "
+                    + "WHERE P.PLAN_CODIGO = D.PLAN_CODIGO AND D.CONTRATO_CODIGO = '" + contrato + "'";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                costoPlan = rs.getDouble(1);
+            }
+
+            st = con.createStatement();
+            query = "SELECT E.EQUIPO_COSTO, D.EQUIPO_CANTIDAD FROM EQUIPO E, "
+                    + "DETALLE_CONTRATO_EQUIPO D, DETALLE_CONTRATO C "
+                    + "WHERE C.DETALLE_CONTRATO_CODIGO = D.DETALLE_CONTRATO_CODIGO AND "
+                    + "D.EQUIPO_CODIGO = E.EQUIPO_CODIGO AND C.CONTRATO_CODIGO = '" + contrato + "'";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                costoEquipo = rs.getDouble(1);
+                cantidadEquipo = rs.getInt(2);
+                sumEquipo += costoEquipo * cantidadEquipo;
+            }
+            sumEquipo += costoPlan;
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+        } 
+        return Double.toString(sumEquipo);
     }
 
     public String consultarCedulas() {
         String cuerpo = null;
         List<String> cedulas = null;
-        String pCanal = null;
         try {
             cedulas = new ArrayList<>();
             con = DataConnect.getConnection();
@@ -764,7 +859,7 @@ public class Peticion {
             }
 
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
         } finally {
             DataConnect.close(con);
         }
@@ -775,7 +870,6 @@ public class Peticion {
         String cuerpo = null;
         List<String> codForma = null;
         List<String> nameForma = null;
-        String pCanal = null;
         try {
             codForma = new ArrayList<>();
             nameForma = new ArrayList<>();
@@ -798,7 +892,7 @@ public class Peticion {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            ///System.out.println(ex.getMessage());
         } finally {
             DataConnect.close(con);
         }
