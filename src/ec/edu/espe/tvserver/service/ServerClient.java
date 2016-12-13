@@ -365,10 +365,10 @@ public class ServerClient extends Thread {
                 break;
 
             case "PAGFAC": //registro nuevo plan del cliente
-                String nuevoPago = p.registroPagoCliente(datosCuerpo);
-                if (nuevoPago != null) {
+                boolean nuevoPago = p.registroPagoCliente(datosCuerpo);
+                if (nuevoPago) {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
-                            + "ACCEPT" + nuevoPago;
+                            + "ACCEPT";
                 } else {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
                 }
@@ -380,6 +380,39 @@ public class ServerClient extends Thread {
                 if (nuevoServicio) {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
                             + "ACCEPT";
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "CLICOD": //consulta de cliente por cedula, devuelve planes del cliente
+                String datos2 = p.buscarCodigoCliente(cuerpo);
+                if (datos2 != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + datos2;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "FACCON": //consulta de de facturas por contrato de cliente
+                String datos3 = p.buscarFacturasPorContrato(cuerpo);
+                if (datos3 != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + datos3;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "DATFAC": //consulta de datos de la factura
+                String datos4 = p.buscarDatosFactura(cuerpo);
+                if (datos4 != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + datos4;
                 } else {
                     rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
                 }

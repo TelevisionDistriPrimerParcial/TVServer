@@ -1096,7 +1096,8 @@ public class Peticion {
         return cuerpo;
     }
 
-    public String registroPagoCliente(String[] cuerpo) {
+    public boolean registroPagoCliente(String[] cuerpo) {
+        boolean flag = true;
         String query = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -1137,13 +1138,13 @@ public class Peticion {
             ps.executeUpdate();
         } catch (SQLException ex) {
             //System.out.println(ex.getMessage());
-            total = null;
+            flag =false;
         } finally {
             DataConnect.close(con);
         }
-        return total;
+        return flag;
     }
-    
+
     public boolean registroNuevoServicioTec(String nombre, String costo) {
         boolean flag = true;
         String query = null;
@@ -1163,5 +1164,119 @@ public class Peticion {
             DataConnect.close(con);
         }
         return flag;
+    }
+
+    public String buscarCodigoCliente(String codigo) {
+        String cuerpo = null;
+        String nombre = null;
+        String apellido = null;
+        String direccion = null;
+        String telefono = null;
+        String cedula = null;
+        List<String> listaContratos = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT CLIENTE_NOMBRE, CLIENTE_APELLIDO,CLIENTE_CEDULA, CLIENTE_DIRECCION, CLIENTE_TELEFONO "
+                    + "FROM CLIENTE WHERE USUARIO_CODIGO = '" + codigo + "'";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                nombre = rs.getString(1);
+                apellido = rs.getString(2);
+                cedula = rs.getString(3);
+                direccion = rs.getString(4);
+                telefono = rs.getString(5);
+            }
+
+            cuerpo = nombre + " " + apellido + "|" + cedula + "|" + direccion + "|" + telefono;
+            listaContratos = new ArrayList<>();
+            query = "SELECT CONTRATO_CODIGO FROM CONTRATO "
+                    + "WHERE USUARIO_CODIGO = '" + codigo + "'";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                listaContratos.add(rs.getString(1));
+            }
+
+            if (listaContratos.size() > 0) {
+                cuerpo = cuerpo + "|";
+                for (int i = 0; i < listaContratos.size(); i++) {
+                    cuerpo = cuerpo + listaContratos.get(i);
+                    if (i < listaContratos.size() - 1) {
+                        cuerpo = cuerpo + "&";
+                    }
+                }
+            }
+
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public String buscarFacturasPorContrato(String contrato) {
+        String cuerpo = null;
+        List<String> listaFacturas = null;
+        try {
+            listaFacturas = new ArrayList<>();
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT FACTURA_CODIGO FROM FACTURA WHERE CONTRATO_CODIGO = '" + contrato + "'";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                listaFacturas.add(rs.getString(1));
+            }
+
+            if (listaFacturas.size() > 0) {
+                cuerpo = cuerpo + "|";
+                for (int i = 0; i < listaFacturas.size(); i++) {
+                    if (i == 0) {
+                        cuerpo = listaFacturas.get(i);
+                    } else {
+                        cuerpo = cuerpo + listaFacturas.get(i);
+                    }
+                    if (i < listaFacturas.size() - 1) {
+                        cuerpo = cuerpo + "|";
+                    }
+                }
+            }
+
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public String buscarDatosFactura(String factura) {
+        String cuerpo = null;
+        String forma = null;
+        String fecha = null;
+        String total = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT F.FORMA_PAGO_DETALLE, P.PAGO_FECHA, P.PAGO_TOTAL FROM "
+                    + "PAGO P, FORMA_PAGO F WHERE P.FORMA_PAGO_CODIGO = F.FORMA_PAGO_CODIGO "
+                    + "AND P.FACTURA_CODIGO = '" + factura + "'";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                forma = rs.getString(1);
+                fecha = rs.getString(2);
+                total = rs.getString(3);
+            }
+            cuerpo = forma + "|" + fecha + "|" + total;
+
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            cuerpo = null;
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
     }
 }
