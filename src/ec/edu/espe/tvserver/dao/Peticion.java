@@ -844,8 +844,8 @@ public class Peticion {
         String query = null;
         ResultSet rs = null;
         Statement st = null;
-        String fecha = cuerpo.substring(0, 13);
-        String contrato = cuerpo.substring(14);
+        String fecha = cuerpo.substring(0, 14);
+        String contrato = cuerpo.substring(15);
         String codUltimaFactura = null;
         String servicioCod = null;
         int anio = Integer.parseInt(fecha.substring(0, 3));
@@ -890,8 +890,10 @@ public class Peticion {
             }
 
             for (int i = 0; i < codServicoPagar.size(); i++) {
-                query = "SELECT TICKET_SERVICIO_CODIGO, TICKET_SERVICIO_FECHA FROM "
-                        + "TICKET_SERVICIO WHERE FACTURA_CODIGO = '" + codUltimaFactura + "' ";
+                query = "SELECT SERVICIO_ADICIONAL_COSTO FROM "
+                        + "SERVICIO_ADICIONAL S, TICKET_SERVICIO T "
+                        + "WHERE T.SERVICIO_ADICIONAL_CODIGO = S.SERVICIO_ADICIONAL_CODIGO "
+                        + "AND T.TICKET_SERVICIO_CODIGO = '" + codServicoPagar.get(i) + "' ";
                 rs = st.executeQuery(query);
                 while (rs.next()) {
                     costoTicket += Double.parseDouble(rs.getString(1));
@@ -996,7 +998,7 @@ public class Peticion {
             ps = con.prepareStatement(query);
             ps.setString(1, codUltimaFactura);
             ps.setString(2, cuerpo[1]);
-            ps.setDate(2, sqlDate);
+            ps.setDate(3, sqlDate);
             ps.executeUpdate();
 
             if (cuerpo[1].equals("1")) {
@@ -1011,7 +1013,7 @@ public class Peticion {
                         + "CANAL_CODIGO) values (?,?)";
                 ps = con.prepareStatement(query);
                 ps.setString(1, codTicket);
-                ps.setString(2, cuerpo[1]);
+                ps.setString(2, cuerpo[2]);
                 ps.executeUpdate();
             }
 
@@ -1058,7 +1060,7 @@ public class Peticion {
         }
         return cuerpo;
     }
-    
+
     public String consultaCanalesPremium() {
         String cuerpo = null;
         List<String> listanameCanales = null;
@@ -1092,5 +1094,74 @@ public class Peticion {
             DataConnect.close(con);
         }
         return cuerpo;
+    }
+
+    public String registroPagoCliente(String[] cuerpo) {
+        String query = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Statement st = null;
+        String codFactura = null;
+        int anio = Integer.parseInt(cuerpo[1].substring(0, 3));
+        int mes = Integer.parseInt(cuerpo[1].substring(4, 5));
+        int dia = Integer.parseInt(cuerpo[1].substring(6, 7));
+        java.util.Date d = new Date(anio, mes, dia);
+        String total = null;
+        con = DataConnect.getConnection();
+
+        try {
+            st = con.createStatement();
+            query = "SELECT MAX(FACTURA_CODIGO) FROM FACTURA WHERE CONTRATO_CODIGO = '" + cuerpo[2] + "'";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                codFactura = rs.getString(1);
+            }
+
+            query = "INSERT INTO PAGO (FORMA_PAGO_CODIGO, FACTURA_CODIGO, PAGO_FECHA, PAGO_TOTAL) values (?,?,?,?)";
+            ps = con.prepareStatement(query);
+            ps.setString(1, cuerpo[0]);
+            ps.setString(2, codFactura);
+            ps.setDate(3, new java.sql.Date(d.getTime()));
+            ps.setString(4, cuerpo[3]);
+            ps.executeUpdate();
+
+            query = "UPDATE FACTURA SET FACTURA_FECHA = ? WHERE FACTURA_CODIGO = '" + codFactura + "'";
+            ps = con.prepareStatement(query);
+            ps.setDate(1, new java.sql.Date(d.getTime()));
+            ps.executeUpdate();
+
+            query = "INSERT INTO FACTURA (CONTRATO_CODIGO, FACTURA_FECHA) values (?,?)";
+            ps = con.prepareStatement(query);
+            ps.setString(1, cuerpo[2]);
+            ps.setDate(2, new java.sql.Date(d.getTime()));
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            total = null;
+        } finally {
+            DataConnect.close(con);
+        }
+        return total;
+    }
+    
+    public boolean registroNuevoServicioTec(String nombre, String costo) {
+        boolean flag = true;
+        String query = null;
+        PreparedStatement ps = null;
+        con = DataConnect.getConnection();
+
+        try {
+            query = "INSERT INTO SERVICIO_ADICIONAL (SERVICIO_ADICIONAL_DETALLE, SERVICIO_ADICIONAL_COSTO) values (?,?)";
+            ps = con.prepareStatement(query);
+            ps.setString(1, nombre);
+            ps.setString(2, costo);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            //System.out.println(ex.getMessage());
+            flag = false;
+        } finally {
+            DataConnect.close(con);
+        }
+        return flag;
     }
 }

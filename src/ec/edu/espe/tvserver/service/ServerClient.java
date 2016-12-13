@@ -363,6 +363,28 @@ public class ServerClient extends Thread {
                 }
                 System.err.println("Servidor responde: " + rs);
                 break;
+
+            case "PAGFAC": //registro nuevo plan del cliente
+                String nuevoPago = p.registroPagoCliente(datosCuerpo);
+                if (nuevoPago != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + nuevoPago;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "REGSOP": //registro nuevo tipo de servicio tecnico
+                boolean nuevoServicio = p.registroNuevoServicioTec(datosCuerpo[0], datosCuerpo[1]);
+                if (nuevoServicio) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT";
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
         }
 
         return rs;
