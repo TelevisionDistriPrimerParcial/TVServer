@@ -588,11 +588,10 @@ public class Peticion {
         }
         return cuerpo;
     }
-    
+
     public String consultarEquipos(String equipo) {
         String cuerpo = null;
         String equipoCosto = null;
-        String tarifa = null;
         try {
             con = DataConnect.getConnection();
             Statement st = con.createStatement();
@@ -603,6 +602,201 @@ public class Peticion {
                 equipoCosto = rs.getString(1);
             }
             cuerpo = equipoCosto;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public String consultarCanales(String canal) {
+        String cuerpo = null;
+        String tipoCanal = null;
+        String pCanal = null;
+        try {
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT CANAL_TIPO, CANAL_PREMIUM FROM CANAL "
+                    + "WHERE CANAL_CODIGO = '" + canal + "'";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                tipoCanal = rs.getString(1);
+                pCanal = rs.getString(2);
+            }
+            cuerpo = tipoCanal + "|" + pCanal;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public boolean registroPlanCliente(String[] cuerpo) {
+        boolean flag = true;
+        String query = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Statement st = null;
+        String codContrato = null;
+        String codFactura = null;
+        String detCodContrato = null;
+        String codUser = null;
+        con = DataConnect.getConnection();
+
+        try {
+            st = con.createStatement();
+            query = "SELECT USUARIO_CODIGO FROM CLIENTE WHERE CLIENTE_CEDULA = '" + cuerpo[0] + "'";
+            rs = st.executeQuery(query);
+            while (rs.next()) {
+                codUser = rs.getString(1);
+            }
+
+            if (codUser != null) {
+                java.util.Date utilDate = new java.util.Date();
+                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+                query = "INSERT INTO CONTRATO (USUARIO_CODIGO, CONTRATO_FECHA, CONTRATO_ESTADO) values (?,?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, codUser);
+                ps.setDate(2, sqlDate);
+                ps.setString(3, "1");
+                ps.executeUpdate();
+
+                query = "SELECT MAX(CONTRATO_CODIGO) FROM CONTRATO";
+                rs = st.executeQuery(query);
+                while (rs.next()) {
+                    codContrato = rs.getString(1);
+                }
+
+                query = "INSERT INTO DETALLE_CONTRATO (CONTRATO_CODIGO, PLAN_CODIGO) values (?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, codContrato);
+                ps.setString(2, cuerpo[1]);
+                ps.executeUpdate();
+
+                query = "SELECT MAX(DETALLE_CONTRATO_CODIGO) FROM DETALLE_CONTRATO";
+                rs = st.executeQuery(query);
+                while (rs.next()) {
+                    detCodContrato = rs.getString(1);
+                }
+
+                query = "INSERT INTO DETALLE_CONTRATO_EQUIPO (DETALLE_CONTRATO_CODIGO, EQUIPO_CODIGO, EQUIPO_CANTIDAD) values (?,?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, detCodContrato);
+                ps.setString(2, cuerpo[2]);
+                ps.setString(3, "1");
+                ps.executeUpdate();
+
+                if (cuerpo.length > 4) {
+                    String[] extra = cuerpo[4].split("\\&");
+                    for (int i = 0; i < extra.length; i++) {
+                        String[] cant = extra[i].split("\\%");
+                        if (cant[0].equals(cuerpo[2])) {
+                            int cantidad = 1 + Integer.parseInt(cant[1]);
+                            query = "UPDATE DETALLE_CONTRATO_EQUIPO SET EQUIPO_CODIGO = '" + cantidad + "' "
+                                    + "WHERE EQUIPO_CANTIDAD = '" + cuerpo[2] + "'";
+                            ps = con.prepareStatement(query);
+                            ps.executeUpdate();
+                        } else {
+                            query = "INSERT INTO DETALLE_CONTRATO_EQUIPO (DETALLE_CONTRATO_CODIGO, EQUIPO_CODIGO, EQUIPO_CANTIDAD) values (?,?,?)";
+                            ps = con.prepareStatement(query);
+                            ps.setString(1, detCodContrato);
+                            ps.setString(2, cant[0]);
+                            ps.setString(3, cant[1]);
+                            ps.executeUpdate();
+                        }
+                    }
+                }
+                
+                query = "INSERT INTO FACTURA (CONTRATO_CODIGO, FACTURA_FECHA) values (?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, codContrato);
+                ps.setDate(2, sqlDate);
+                ps.executeUpdate();
+                
+                query = "SELECT MAX(FACTURA_CODIGO) FROM FACTURA";
+                rs = st.executeQuery(query);
+                while (rs.next()) {
+                    codFactura = rs.getString(1);
+                }
+                
+                query = "INSERT INTO PAGO (FORMA_PAGO_CODIGO, FACTURA_CODIGO, PAGO_FECHA) values (?,?,?)";
+                ps = con.prepareStatement(query);
+                ps.setString(1, cuerpo[3]);
+                ps.setString(2, codFactura);
+                ps.setDate(3, sqlDate);
+                ps.executeUpdate();
+
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            flag = false;
+        } finally {
+            DataConnect.close(con);
+        }
+        return flag;
+    }
+
+    public String consultarCedulas() {
+        String cuerpo = null;
+        List<String> cedulas = null;
+        String pCanal = null;
+        try {
+            cedulas = new ArrayList<>();
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT CLIENTE_CEDULA FROM CLIENTE";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                cedulas.add(rs.getString(1));
+            }
+
+            for (int i = 0; i < cedulas.size(); i++) {
+                if (i == 0) {
+                    cuerpo = cedulas.get(i);
+                } else {
+                    cuerpo = cuerpo + cedulas.get(i);
+                }
+                if (i < cedulas.size() - 1) {
+                    cuerpo = cuerpo + "|";
+                }
+            }
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            DataConnect.close(con);
+        }
+        return cuerpo;
+    }
+
+    public String consultarFormasPago() {
+        String cuerpo = null;
+        List<String> codForma = null;
+        List<String> nameForma = null;
+        String pCanal = null;
+        try {
+            codForma = new ArrayList<>();
+            nameForma = new ArrayList<>();
+            con = DataConnect.getConnection();
+            Statement st = con.createStatement();
+            String query = "SELECT * FROM FORMA_PAGO";
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                codForma.add(rs.getString(1));
+                nameForma.add(rs.getString(2));
+            }
+            for (int i = 0; i < codForma.size(); i++) {
+                if (i == 0) {
+                    cuerpo = codForma.get(i) + "%" + nameForma.get(i);
+                } else {
+                    cuerpo = cuerpo + codForma.get(i) + "%" + nameForma.get(i);
+                }
+                if (i < codForma.size() - 1) {
+                    cuerpo = cuerpo + "&";
+                }
+            }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         } finally {

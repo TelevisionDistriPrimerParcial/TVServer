@@ -259,6 +259,50 @@ public class ServerClient extends Thread {
                 }
                 System.err.println("Servidor responde: " + rs);
                 break;
+
+            case "DATCAN": //consulta datos plan
+                String canales2 = p.consultarCanales(cuerpo);
+                if (canales2 != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + canales2;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "NUEPLA": //registro nuevo plan
+                boolean nuevoPlan2 = p.registroPlanCliente(datosCuerpo);
+                if (nuevoPlan2) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT";
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "CEDUID": //consulta datos plan
+                String ced = p.consultarCedulas();
+                if (ced != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + ced;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
+
+            case "CONPAG": //consulta datos plan
+                String pagos = p.consultarFormasPago();
+                if (pagos != null) {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha
+                            + "ACCEPT" + pagos;
+                } else {
+                    rs = "RS" + sistemaConectado + codigoSolicitante + tipoPeticion + fecha + "DENIED";
+                }
+                System.err.println("Servidor responde: " + rs);
+                break;
         }
 
         return rs;
